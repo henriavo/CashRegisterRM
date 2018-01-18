@@ -8,14 +8,17 @@ public class Main {
     private final static String NUMBERS = "[0-9]+";
     private final static Integer MAX_ARGS = 6;
     private final static Integer MIN_ARGS = 1;
+    private static Register register;
 
     public static void main(String[] args) {
+        register = new Register();
         System.out.println("ready ");
         while(true){
             try {
                 loop();
             } catch(Exception e){
                 System.out.println("ERROR: " + e.fillInStackTrace());
+                register.close();
                 System.exit(0);
             }
         }
@@ -28,36 +31,43 @@ public class Main {
 
         validate(inputSplit);
 
-        //System.out.println("input : " + input);
-
         // > show
         // $Total #$20 #$10 #$5 #$2 #$1
         if("show".equals(inputSplit[0])){
-            System.out.println(" SHOW ");
+            showStatus();
         }
         // > put 1 2 3 4 5
         else if("put".equals(inputSplit[0])){
-            System.out.println(" PUT ");
+            register.putBillCount(20, Integer.valueOf(inputSplit[1]));
+            register.putBillCount(10, Integer.valueOf(inputSplit[2]));
+            register.putBillCount(5, Integer.valueOf(inputSplit[3]));
+            register.putBillCount(2, Integer.valueOf(inputSplit[4]));
+            register.putBillCount(1, Integer.valueOf(inputSplit[5]));
+
+            showStatus();
         }
         // > take 1 2 3 4 5
         else if("take".equals(inputSplit[0])){
-            System.out.println(" TAKE ");
+
         }
         // > change 12
         else if("change".equals(inputSplit[0])){
-            System.out.println(" CHANGE ");
+
         }
         // > quit
         else if ("quit".equals(inputSplit[0])) {
             System.out.println("Bye ");
+            register.close();
             System.exit(0);
         }
         else {
             System.out.println(" invalid command! ");
 
         }
+    }
 
-
+    private static void showStatus(){
+        System.out.println(register.show());
     }
 
     private static void validate(String[] inputSplit) throws Exception {
@@ -74,6 +84,4 @@ public class Main {
         }
 
     }
-
 }
-
