@@ -16,7 +16,6 @@ public class Register {
     }
 
     public void putBillCount(int denomination, int count){
-
         if(db.documentExists(denomination)){
             //update case
             Document doc = db.getDocForDenomination(denomination);
@@ -63,5 +62,25 @@ public class Register {
 
     public void close(){
         db.close();
+    }
+
+    public void takeBillCount(int denomination, int count) {
+        if(db.documentExists(denomination)){
+            //update case
+            Document doc = db.getDocForDenomination(denomination);
+            int dbCount = (Integer)doc.get(COUNT);
+            dbCount -= count;
+
+            if(dbCount < 0)
+                doc.put(COUNT, 0);
+            else
+                doc.put(COUNT, dbCount);
+
+            WriteResult writeResult = db.updateRecord(doc);
+            NitriteId nitriteId = Iterables.firstOrDefault(writeResult);
+            //System.out.println(" updated existing nitriteId: " + nitriteId);
+            //System.out.println(" denomination: " + denomination + " count: " + count);
+        }
+
     }
 }

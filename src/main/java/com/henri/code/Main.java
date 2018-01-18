@@ -48,7 +48,13 @@ public class Main {
         }
         // > take 1 2 3 4 5
         else if("take".equals(inputSplit[0])){
+            register.takeBillCount(20, Integer.valueOf(inputSplit[1]));
+            register.takeBillCount(10, Integer.valueOf(inputSplit[2]));
+            register.takeBillCount(5, Integer.valueOf(inputSplit[3]));
+            register.takeBillCount(2, Integer.valueOf(inputSplit[4]));
+            register.takeBillCount(1, Integer.valueOf(inputSplit[5]));
 
+            showStatus();
         }
         // > change 12
         else if("change".equals(inputSplit[0])){
