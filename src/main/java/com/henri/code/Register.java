@@ -7,6 +7,9 @@ import java.util.Arrays;
 public class Register {
     private final String COUNT = "COUNT";
     private int[] denominations = {20, 10, 5, 2, 1};
+    private int[] indexies = {0, 1, 2, 3, 4};
+    private final int MAX_INDEX = 4;
+    private final int ARRAY_LENGTH = 5;
     private Database db;
 
     public Register(){
@@ -67,88 +70,96 @@ public class Register {
 
     public String getChange(Integer total){
         ArrayList<Integer> billsCount = getBillsCountList();
-        StringBuilder sb = new StringBuilder();
+        Change change = new Change(total);
 
-        Total total1 = new Total(total);
-
-        //TODO: use the new Change class
-        // Change change = new Change();
-
-        int count$20 = changeForBill(billsCount, 0, 20.0, total1, sb);
-        int count$10 = changeForBill(billsCount, 1, 10.0, total1, sb);
-        int count$5 = changeForBill(billsCount, 2, 5.0, total1, sb);
-        int count$2 = changeForBill(billsCount, 3, 2.0, total1, sb);
-        int count$1 = changeForBill(billsCount, 4, 1.0, total1, sb);
-
-        //sorry message if not able to return change
-        if(!(total1.total < 0.001))
-            return "sorry ";
+        if(greedyFindChange(billsCount, change)){
+            return foundChange(change);
+        }
+        else if(attentiveFindChange(billsCount, change)){
+            return foundChange(change);
+        }
         else {
-            takeBillCount(20, count$20);
-            takeBillCount(10, count$10);
-            takeBillCount(5, count$5);
-            takeBillCount(2, count$2);
-            takeBillCount(1, count$1);
-            return sb.toString();
+            return "sorry ";
         }
     }
 
-    public ArrayList<Integer> getBillsCountList(){
-        Integer[] result = new Integer[5];
-        for(int i =0;i<denominations.length;i++){
-            if(db.documentExists(denominations[i])){
+    private Boolean greedyFindChange(ArrayList<Integer> billsCount, Change change){
+        //CASE 1: greedy-takeBillsFromRegister as many of the highest value bills without going over
+        for (int i = 0; i <= MAX_INDEX; i++) {
+            changeForBill(billsCount, indexies[i], denominations[i], change);
+        }
+
+        return (change.totalRemaining == 0);
+
+    }
+
+    private Boolean attentiveFindChange(ArrayList<Integer> billsCount, Change change){
+        //CASE 2: greedy algorithm fails to find available change
+        //  Begin to place high value bills back into register, and takeBillsFromRegister lower value bills in its place
+        int n = 0;
+        int j = 1;
+        while((change.totalRemaining != 0) && j != ARRAY_LENGTH){
+
+            if(change.getBillCount(denominations[n]) != 0){
+                change.putBillsBackInRegister(denominations[n], 1);
+
+                for (int i = j; i <= MAX_INDEX; i++)
+                    changeForBill(billsCount, indexies[i], denominations[i], change);
+
+                if(change.totalRemaining == 0)
+                    return true;
+
+                change.takeBillsFromRegister(denominations[n], 1);
+            }
+            j++;
+            n++;
+        }
+
+        return false;
+    }
+
+    private String foundChange(Change change){
+        for(int i = 0;i <= MAX_INDEX; i++){
+            takeBillCount(denominations[i], change.getBillCount(denominations[i]));
+        }
+        return change.toString();
+    }
+
+    private ArrayList<Integer> getBillsCountList(){
+        Integer[] result = new Integer[ARRAY_LENGTH];
+        for(int i =0;i<denominations.length;i++) {
+            if(db.documentExists(denominations[i])) {
                 int count = (Integer)db.getDocForDenomination(denominations[i]).get(COUNT);
                 result[i] = count;
             }
-            else {
-                // no entry exists
+            else // no entry exists
                 result[i] = 0;
-            }
         }
-
         return new ArrayList<>(Arrays.asList(result));
     }
 
-    public int changeForBill(ArrayList<Integer> billsCount,
+    private void changeForBill(ArrayList<Integer> dbBillCounts,
                              int index,
-                             double value, // ie 20
-                             Total total, // what you want change for
-                             StringBuilder sb){
-        int billCount = 0;
+                             int billValue,
+                             Change change){
 
-        if(billsCount.get(index) != 0){
-            Double result = total.total / value;
-            Integer wholeResult = result.intValue();
+        if(dbBillCounts.get(index) != 0){
+            Integer result = change.totalRemaining / billValue;
+            // no need for decimal part?
 
             if(result >= 1 ){
-                while(billsCount.get(index) != 0 && wholeResult != billCount) {
-                    billCount++;
-                    Integer num = billsCount.get(index);
-                    billsCount.set(index, --num);
-
+                while(dbBillCounts.get(index) != 0 && result != change.getBillCount(billValue)) {
+                    change.takeBillsFromRegister(billValue, 1);
+                    Integer num = dbBillCounts.get(index);
+                    dbBillCounts.set(index, --num);
                 }
-                sb.append(billCount).append(" ");
-                int newTotal = (int) (total.total - (value * billCount));
-                total.setTotal(newTotal);
-                return billCount;
             }
         }
-        sb.append("0 ");
-        return billCount;
     }
 
     public void close(){
         db.close();
     }
 
-    public class Total{
-        public int total = 0;
-        public Total(int a){
-            total = a;
-        }
-        public void setTotal(int a){
-            total = a;
-        }
-    }
 
 }

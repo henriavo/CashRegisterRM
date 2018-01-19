@@ -54,8 +54,6 @@ public class Main {
         else if("change".equals(inputSplit[0])){
             String result = register.getChange(Integer.valueOf(inputSplit[1]));
             System.out.println(result);
-
-            showStatus();
         }
         else if ("quit".equals(inputSplit[0])) {
             System.out.println("Bye ");

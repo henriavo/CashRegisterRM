@@ -12,7 +12,6 @@ public class RegisterTest {
         register.putBillCount(2, 4);
         register.putBillCount(1, 0);
 
-
         System.out.println(register.show());
 
         String result = register.getChange(11);
