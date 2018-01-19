@@ -1,10 +1,8 @@
 package com.henri.code;
 
 import org.dizitart.no2.*;
-
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.eq;
-
 
 public class Database {
     private final String COLLECTION = "cash_collection";

@@ -7,7 +7,6 @@ public class Main {
     private final static String LETTERS = "[a-zA-Z]+";
     private final static String NUMBERS = "[0-9]+";
     private final static Integer MAX_ARGS = 6;
-    private final static Integer MIN_ARGS = 1;
     private static Register register;
 
     public static void main(String[] args) {
@@ -31,12 +30,9 @@ public class Main {
 
         validate(inputSplit);
 
-        // > show
-        // $Total #$20 #$10 #$5 #$2 #$1
         if("show".equals(inputSplit[0])){
             showStatus();
         }
-        // > put 1 2 3 4 5
         else if("put".equals(inputSplit[0])){
             register.putBillCount(20, Integer.valueOf(inputSplit[1]));
             register.putBillCount(10, Integer.valueOf(inputSplit[2]));
@@ -46,7 +42,6 @@ public class Main {
 
             showStatus();
         }
-        // > take 1 2 3 4 5
         else if("take".equals(inputSplit[0])){
             register.takeBillCount(20, Integer.valueOf(inputSplit[1]));
             register.takeBillCount(10, Integer.valueOf(inputSplit[2]));
@@ -56,11 +51,12 @@ public class Main {
 
             showStatus();
         }
-        // > change 12
         else if("change".equals(inputSplit[0])){
+            String result = register.getChange(Integer.valueOf(inputSplit[1]));
+            System.out.println(result);
 
+            showStatus();
         }
-        // > quit
         else if ("quit".equals(inputSplit[0])) {
             System.out.println("Bye ");
             register.close();
@@ -77,7 +73,7 @@ public class Main {
     }
 
     private static void validate(String[] inputSplit) throws Exception {
-        if(inputSplit.length != MAX_ARGS && inputSplit.length != MIN_ARGS)
+        if(inputSplit.length != MAX_ARGS && inputSplit.length != 1  && inputSplit.length != 2)
             throw new Exception(" incorrect number of arguments!");
         if(!Pattern.matches(LETTERS, inputSplit[0]))
             throw new Exception(" first argument can only be letters!");
